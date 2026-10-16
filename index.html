@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة أطباء الشلف - Chlef Doctors Platform</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f8fafc;
+        }
+        .modal {
+            transition: opacity 0.25s ease;
+        }
+        body.modal-active {
+            overflow-x: hidden;
+            overflow-y: hidden;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- Header Navigation -->
+    <header class="bg-teal-700 text-white shadow-lg sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3 space-x-reverse cursor-pointer" onclick="switchTab('home')">
+                <div class="bg-white text-teal-700 p-2 rounded-lg font-extrabold text-xl shadow">
+                    <i class="fa-solid font-bold fa-user-doctor"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold leading-none">أطباء الشلف</h1>
+                    <span class="text-xs text-teal-200">المنصة الطبية الأولى بـ الشلف</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 space-x-reverse">
+                <button onclick="openModal('doctorAuthModal')" class="bg-teal-600 hover:bg-teal-800 text-white text-sm px-3 py-2 rounded-lg font-semibold transition border border-teal-500 shadow-sm flex items-center gap-1">
+                    <i class="fa-solid fa-stethoscope"></i>
+                    <span class="hidden sm:inline">دخول الأطباء</span>
+                </button>
+                <button onclick="openModal('adminAuthModal')" class="bg-slate-800 hover:bg-slate-900 text-slate-200 text-sm px-3 py-2 rounded-lg font-semibold transition shadow-sm flex items-center gap-1">
+                    <i class="fa-solid fa-user-shield"></i>
+                    <span class="hidden sm:inline">الإدارة</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="container mx-auto px-4 py-6 flex-grow">
+
+        <!-- PATIENT/PUBLIC VIEW -->
+        <div id="view-home" class="space-y-6">
+            <!-- Hero Banner -->
+            <div class="bg-gradient-to-l from-teal-800 to-teal-600 text-white rounded-2xl p-6 md:p-8 shadow-xl text-center md:text-right relative overflow-hidden">
+                <div class="relative z-10 max-w-2xl">
+                    <h2 class="text-2xl md:text-4xl font-extrabold mb-3">احجز موعدك الطبي بمدينة الشلف بسهولة وراحة</h2>
+                    <p class="text-teal-100 text-sm md:text-base mb-4">اختر طبيبك الخاص، اضطلع على مواعيد العيادة، واضمن حجزك مباشرة وبدون عناء الانتظار.</p>
+                    <div class="inline-flex items-center gap-2 bg-teal-900/40 backdrop-blur border border-teal-400/30 text-teal-100 px-4 py-2 rounded-full text-xs md:text-sm">
+                        <i class="fa-solid fa-circle-info text-amber-300"></i>
+                        <span>رسم حجز الخدمة عبر المنصة: <strong class="text-white">50.00 دج</strong> فقط</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search & Filter Controls -->
+            <div class="bg-white p-4 rounded-xl shadow-md border border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute right-3 top-3.5 text-slate-400"></i>
+                    <input type="text" id="searchInput" oninput="filterDoctors()" placeholder="ابحث باسم الطبيب أو العيادة..." class="w-full pr-10 pl-3 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600 text-sm">
+                </div>
+                <div>
+                    <select id="specialtyFilter" onchange="filterDoctors()" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600 text-sm">
+                        <option value="">جميع التخصصات الطبية</option>
+                        <option value="طب عام">طب عام</option>
+                        <option value="طب الأطفال">طب الأطفال</option>
+                        <option value="طب أمراض النساء والتوليد">طب أمراض النساء والتوليد</option>
+                        <option value="أمراض القلب والشرايين">أمراض القلب والشرايين</option>
+                        <option value="جراحة العظام والمفاصل">جراحة العظام والمفاصل</option>
+                        <option value="طب وجراحة الأسنان">طب وجراحة الأسنان</option>
+                        <option value="أمراض العيون">أمراض العيون</option>
+                        <option value="أمراض الجلد">أمراض الجلد</option>
+                        <option value="أمراض الأذن والأنف والحنجرة">أمراض الأذن والأنف والحنجرة</option>
+                        <option value="أمراض الاعصاب">أمراض الأعصاب</option>
+                    </select>
+                </div>
+                <div>
+                    <select id="communeFilter" onchange="filterDoctors()" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600 text-sm">
+                        <option value="">جميع بلدية ولاية الشلف</option>
+                        <option value="الشلف مركز">الشلف مركز</option>
+                        <option value="الشطية">الشطية</option>
+                        <option value="أولاد فارس">أولاد فارس</option>
+                        <option value="بوقادير">بوقادير</option>
+                        <option value="تنس">تنس</option>
+                        <option value="عين مران">عين مران</option>
+                        <option value="وادي الفضة">وادي الفضة</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Doctors Grid Container -->
+            <div id="doctorsListGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Dynamic cards populated here -->
+                <div class="col-span-full text-center py-12 text-slate-500">
+                    <i class="fa-solid fa-spinner fa-spin text-3xl text-teal-600 mb-2"></i>
+                    <p>جاري تحميل قائمة الأطباء...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- DOCTOR PANEL VIEW -->
+        <div id="view-doctor" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-lg border border-slate-200">
+                <div class="flex flex-wrap justify-between items-center gap-4 border-b border-slate-200 pb-4">
+                    <div>
+                        <span class="bg-teal-100 text-teal-800 text-xs px-2.5 py-1 rounded-full font-bold">لوحة تحكم الطبيب</span>
+                        <h2 id="docPanelName" class="text-2xl font-bold text-slate-800 mt-1">د. ...</h2>
+                        <p id="docPanelSpec" class="text-sm text-slate-500"></p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="openEditDoctorProfile()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg text-sm font-semibold border border-slate-300 flex items-center gap-1 transition">
+                            <i class="fa-solid fa-user-pen"></i> تعديل بياناتي
+                        </button>
+                        <button onclick="logoutDoctor()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-2 rounded-lg text-sm font-semibold border border-rose-200 flex items-center gap-1 transition">
+                            <i class="fa-solid fa-right-from-bracket"></i> خروج
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Notice BaridiMob -->
+                <div id="docBaridiNotice" class="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl flex flex-col md:flex-row justify-between items-center gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-amber-500 text-white p-2.5 rounded-lg text-lg">
+                            <i class="fa-solid fa-credit-card"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-amber-900 text-sm">حساب تحويل العمولات (BaridiMob)</h4>
+                            <p class="text-xs text-amber-800">يرجى تحويل مستحقات المنصة (50 دج لكل حجز مؤكد) إلى حساب الـ RIP التالي:</p>
+                        </div>
+                    </div>
+                    <div class="bg-white px-4 py-2 rounded-lg border border-amber-300 font-mono font-bold text-slate-800 text-center text-sm shadow-sm">
+                        <span id="docBaridiRipDisplay">جاري التحميل...</span>
+                    </div>
+                </div>
+
+                <!-- Bookings Table for Doctor -->
+                <div class="mt-6">
+                    <h3 class="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-calendar-check text-teal-600"></i>
+                        قائمة المرضى والحجوزات المؤكدة
+                    </h3>
+                    <div class="overflow-x-auto rounded-xl border border-slate-200">
+                        <table class="w-full text-right text-sm">
+                            <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-3">اسم المريض</th>
+                                    <th class="p-3">رقم الهاتف</th>
+                                    <th class="p-3">الموعد والتاريخ</th>
+                                    <th class="p-3">حالة الحضور</th>
+                                    <th class="p-3 text-center">إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="doctorAppointmentsTable">
+                                <tr>
+                                    <td colspan="5" class="p-6 text-center text-slate-500">لا توجد حجوزات مؤكدة حالياً</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADMIN PANEL VIEW -->
+        <div id="view-admin" class="hidden space-y-6">
+            <div class="bg-slate-900 text-white p-6 rounded-2xl shadow-xl">
+                <div class="flex flex-wrap justify-between items-center gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                        <span class="bg-amber-500/20 text-amber-300 text-xs px-2.5 py-1 rounded-full font-bold border border-amber-500/30">لوحة الإدارة المركزية</span>
+                        <h2 class="text-2xl font-bold text-white mt-1">إدارة منصة أطباء الشلف</h2>
+                        <p class="text-xs text-slate-400">إشراف وتسيير: <strong>طيب أحمد عبد الكريم</strong></p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="openModal('addDoctorModal')" class="bg-teal-600 hover:bg-teal-500 text-white px-3 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                            <i class="fa-solid fa-user-plus"></i> إضافة طبيب جديد
+                        </button>
+                        <button onclick="logoutAdmin()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-lg text-sm font-semibold transition border border-slate-700">
+                            خروج
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Admin Settings RIP -->
+                <div class="mt-6 bg-slate-800/80 p-4 rounded-xl border border-slate-700 space-y-3">
+                    <h3 class="text-sm font-bold text-amber-400 flex items-center gap-2">
+                        <i class="fa-solid fa-wallet"></i> إعدادات حساب BaridiMob لجمع العمولات
+                    </h3>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input type="text" id="adminBaridiInput" placeholder="أدخل رقم الـ RIP / BaridiMob الخاص بك هنا" class="flex-grow p-2.5 bg-slate-900 border border-slate-600 rounded-lg text-white font-mono text-sm focus:outline-none focus:border-amber-400">
+                        <button onclick="saveAdminBaridiRip()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-5 py-2.5 rounded-lg text-sm transition">
+                            حفظ الحساب
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tab switching inside Admin -->
+                <div class="mt-6 flex border-b border-slate-800 space-x-4 space-x-reverse text-sm font-bold">
+                    <button id="adminTabBtn1" onclick="switchAdminSubTab('requests')" class="py-2 border-b-2 border-amber-400 text-amber-400">
+                        طلبات الحجز المعلقة (<span id="pendingCount">0</span>)
+                    </button>
+                    <button id="adminTabBtn2" onclick="switchAdminSubTab('doctors')" class="py-2 text-slate-400 hover:text-white">
+                        إدارة الأطباء المسجلين (<span id="doctorsCount">0</span>)
+                    </button>
+                </div>
+
+                <!-- SubTab 1: Pending Requests -->
+                <div id="adminSubTab-requests" class="mt-4">
+                    <div class="overflow-x-auto rounded-xl border border-slate-800">
+                        <table class="w-full text-right text-sm">
+                            <thead class="bg-slate-800 text-slate-300">
+                                <tr>
+                                    <th class="p-3">المريض</th>
+                                    <th class="p-3">الهاتف</th>
+                                    <th class="p-3">الطبيب المطلوب</th>
+                                    <th class="p-3">تاريخ ووقت الموعد</th>
+                                    <th class="p-3 text-center">إجراءات القبول والرفض</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminPendingRequestsTable">
+                                <tr>
+                                    <td colspan="5" class="p-6 text-center text-slate-500">لا توجد طلبات حجز معلقة حالياً</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- SubTab 2: Registered Doctors -->
+                <div id="adminSubTab-doctors" class="mt-4 hidden">
+                    <div class="overflow-x-auto rounded-xl border border-slate-800">
+                        <table class="w-full text-right text-sm">
+                            <thead class="bg-slate-800 text-slate-300">
+                                <tr>
+                                    <th class="p-3">اسم الطبيب</th>
+                                    <th class="p-3">التخصص</th>
+                                    <th class="p-3">البلدية والاسم والعيادة</th>
+                                    <th class="p-3">اسم المستخدم للتسجيل</th>
+                                    <th class="p-3 text-center">حذف العيادة</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminDoctorsTable">
+                                <tr>
+                                    <td colspan="5" class="p-6 text-center text-slate-500">لا يوجد أطباء مسجلين</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 text-xs py-6 mt-12 border-t border-slate-800">
+        <div class="container mx-auto px-4 text-center space-y-2">
+            <p class="font-semibold text-slate-300">منصة أطباء الشلف - الدليل والتسهيل الطبي الإلكتروني المحلي</p>
+            <p>حقوق الملكية والتطوير محفوظة كلياً لـ : <span class="text-teal-400 font-bold">طيب أحمد عبد الكريم</span> &copy; 2026</p>
+        </div>
+    </footer>
+
+    <!-- MODALS SECTION -->
+
+    <!-- Modal: Doctor Login -->
+    <div id="doctorAuthModal" class="modal opacity-0 pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative">
+            <button onclick="closeModal('doctorAuthModal')" class="absolute top-4 left-4 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-stethoscope text-teal-600"></i> تسجيل دخول الطبيب
+            </h3>
+            <form onsubmit="handleDoctorLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">اسم المستخدم</label>
+                    <input type="text" id="docLoginUsername" required class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-600 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">كلمة المرور</label>
+                    <input type="password" id="docLoginPassword" required class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-600 focus:outline-none">
+                </div>
+                <button type="submit" class="w-full bg-teal-700 hover:bg-teal-800 text-white font-bold py-2.5 rounded-lg text-sm transition">
+                    دخول إلى العيادة
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Admin Login (Empty fields for absolute security) -->
+    <div id="adminAuthModal" class="modal opacity-0 pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm">
+        <div class="bg-slate-900 text-white rounded-2xl shadow-2xl w-full max-w-md p-6 border border-slate-800 relative">
+            <button onclick="closeModal('adminAuthModal')" class="absolute top-4 left-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <h3 class="text-xl font-bold text-amber-400 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-user-shield"></i> تسجيل دخول الإدارة
+            </h3>
+            <form onsubmit="handleAdminLogin(event)" class="space-y-4" autocomplete="off">
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">رقم الهاتف الخاص بالأدمن</label>
+                    <input type="text" id="adminPhoneInput" autocomplete="off" required placeholder="" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-amber-400 focus:outline-none text-white">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">كلمة السر</label>
+                    <input type="password" id="adminPassInput" autocomplete="new-password" required placeholder="" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-amber-400 focus:outline-none text-white">
+                </div>
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition">
+                    تأكيد الدخول
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Patient Booking Form -->
+    <div id="bookingModal" class="modal opacity-0 pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 relative">
+            <button onclick="closeModal('bookingModal')" class="absolute top-4 left-4 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <h3 class="text-xl font-bold text-slate-800 mb-1">حجز موعد طبي جديد</h3>
+            <p id="bookingDocName" class="text-xs text-teal-700 font-bold mb-4">لدى الطبيب: ...</p>
+            
+            <form onsubmit="submitBookingForm(event)" class="space-y-3">
+                <input type="hidden" id="bookingDoctorId">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">اسم المريض الكامل</label>
+                    <input type="text" id="patientName" required placeholder="مثال: محمد بن يوسف" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-600 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">رقم الهاتف</label>
+                    <input type="tel" id="patientPhone" required placeholder="06XXXXXXXX" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-600 focus:outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">التاريخ المطلوب</label>
+                        <input type="date" id="bookingDate" required class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-600 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">التوقيت المفصل</label>
+                        <input type="time" id="bookingTime" required class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-600 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900 flex items-start gap-2">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-600 mt-0.5"></i>
+                    <div>
+                        <strong>ملاحظة هامة:</strong> رسم خدمة الحجز الإلكتروني هو <strong>50.00 دج</strong> (لا يشمل مصاريف الكشفية للطبيب). سيتم مراجعة الموعد وتأكيده مباشرة.
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-teal-700 hover:bg-teal-800 text-white font-bold py-2.5 rounded-lg text-sm transition shadow-md">
+                    تأكيد إرسال الطلب
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Add New Doctor (Admin Only) -->
+    <div id="addDoctorModal" class="modal opacity-0 pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeModal('addDoctorModal')" class="absolute top-4 left-4 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <h3 class="text-xl font-bold text-slate-800 mb-4">إضافة طبيب وعيادة جديدة</h3>
+            
+            <form onsubmit="handleAddDoctor(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">اسم الطبيب الكامل</label>
+                    <input type="text" id="newDocName" required placeholder="د. أحمد عبد الله" class="w-full p-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-600">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">التخصص الطبي</label>
+                        <select id="newDocSpec" required class="w-full p-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-600">
+                            <option value="طب عام">طب عام</option>
+                            <option value="طب الأطفال">طب الأطفال</option>
+                            <option value="طب أمراض النساء والتوليد">طب أمراض النساء والتوليد</option>
+                            <option value="أمراض القلب والشرايين">أمراض القلب والشرايين</option>
+                            <option value="جراحة العظام والمفاصل">جراحة العظام والمفاصل</option>
+                            <option value="طب وجراحة الأسنان">طب وجراحة الأسنان</option>
+                            <option value="أمراض العيون">أمراض العيون</option>
+                            <option value="أمراض الجلد">أمراض الجلد</option>
+                            <option value="أمراض الأذن والأنف والحنجرة">أمراض الأذن والأنف والحنجرة</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">البلدية (الشلف)</label>
+                        <select id="newDocCommune" required class="w-full p-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-600">
+                            <option value="الشلف مركز">الشلف مركز</option>
+                            <option value="الشطية">الشطية</option>
+                            <option value="أولاد فارس">أولاد فارس</option>
+                            <option value="بوقادير">بوقادير</option>
+                            <option value="تنس">تنس</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">العنوان التفصيلي للعيادة</label>
+                    <input type="text" id="newDocAddress" placeholder="حي بن سونة، مقابل الصيدلية المركزية" class="w-full p-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-600">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">رقم هاتف التواصل</label>
+                        <input type="tel" id="newDocPhone" required placeholder="06XXXXXXXX" class="w-full p-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-600">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">رقم الواتساب</label>
+                        <input type="tel" id="newDocWhatsapp" placeholder="06XXXXXXXX" class="w-full p-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-600">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">رابط الموقع على الخريطة (GPS)</label>
+                    <input type="url" id="newDocGps" placeholder="https://maps.google.com/..." class="w-full p-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-600">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">أوقات وساعات العمل</label>
+                    <input type="text" id="newDocHours" placeholder="من الأحد إلى الخميس - 08:00 إلى 16:00" class="w-full p-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-600">
+                </div>
+
+                <div class="border-t border-slate-200 pt-3 mt-2 grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">اسم المستخدم لدخول الطبيب</label>
+                        <input type="text" id="newDocUser" required class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">كلمة المرور الخاصة به</label>
+                        <input type="password" id="newDocPass" required class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:outline-none">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-teal-700 hover:bg-teal-800 text-white font-bold py-2.5 rounded-lg text-sm transition mt-3">
+                    حفظ وإضافة الطبيب
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Edit Doctor Profile -->
+    <div id="editDoctorModal" class="modal opacity-0 pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeModal('editDoctorModal')" class="absolute top-4 left-4 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <h3 class="text-xl font-bold text-slate-800 mb-4">تعديل بيانات عيادتي الحالية</h3>
+            
+            <form onsubmit="handleSaveDoctorProfile(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">اسم الطبيب/العيادة</label>
+                    <input type="text" id="editDocName" required class="w-full p-2 border border-slate-300 rounded-lg text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">العنوان التفصيلي</label>
+                    <input type="text" id="editDocAddress" class="w-full p-2 border border-slate-300 rounded-lg text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">رقم الهاتف</label>
+                        <input type="tel" id="editDocPhone" required class="w-full p-2 border border-slate-300 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">رقم الواتساب</label>
+                        <input type="tel" id="editDocWhatsapp" class="w-full p-2 border border-slate-300 rounded-lg text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">أوقات العمل</label>
+                    <input type="text" id="editDocHours" class="w-full p-2 border border-slate-300 rounded-lg text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">رابط الـ GPS</label>
+                    <input type="url" id="editDocGps" class="w-full p-2 border border-slate-300 rounded-lg text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">تغيير كلمة السر الخاصة بدخولي</label>
+                    <input type="password" id="editDocPass" placeholder="اتركها فارغة إذا لم ترد التغيير" class="w-full p-2 border border-slate-300 rounded-lg text-sm">
+                </div>
+
+                <button type="submit" class="w-full bg-teal-700 hover:bg-teal-800 text-white font-bold py-2.5 rounded-lg text-sm transition mt-3">
+                    تحديث وحفظ البيانات
+                </button>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- APPLICATION SCRIPT & FIREBASE INTEGRATION -->
+    <script>
+        // Realtime Database URL
+        const FIREBASE_DB_URL = "https://tabib-chlef-default-rtdb.firebaseio.com";
+
+        // Admin Secret Credentials
+        const ADMIN_PHONE = "0670800009";
+        const ADMIN_PASS = "27";
+
+        // Global State
+        let doctorsData = {};
+        let appointmentsData = {};
+        let baridiRip = "00799999000000000000"; // Default
+        let currentLoggedDoctorId = null;
+
+        // Initialize Application & Sync
+        window.addEventListener('DOMContentLoaded', () => {
+            syncDataFromFirebase();
+            setInterval(syncDataFromFirebase, 4000); // Poll every 4 seconds for live sync
+        });
+
+        // Firebase API Helpers
+        async function syncDataFromFirebase() {
+            try {
+                const res = await fetch(`${FIREBASE_DB_URL}/.json`);
+                if (res.ok) {
+                    const data = await res.json() || {};
+                    doctorsData = data.doctors || {};
+                    appointmentsData = data.appointments || {};
+                    if(data.settings && data.settings.baridiRip) {
+                        baridiRip = data.settings.baridiRip;
+                    }
+                    renderAll();
+                }
+            } catch (err) {
+                console.error("Firebase sync error:", err);
+            }
+        }
+
+        async function updateFirebasePath(path, payload) {
+            try {
+                await fetch(`${FIREBASE_DB_URL}/${path}.json`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                syncDataFromFirebase();
+            } catch (e) {
+                console.error("Save error:", e);
+            }
+        }
+
+        async function deleteFirebasePath(path) {
+            try {
+                await fetch(`${FIREBASE_DB_URL}/${path}.json`, {
+                    method: 'DELETE'
+                });
+                syncDataFromFirebase();
+            } catch (e) {
+                console.error("Delete error:", e);
+            }
+        }
+
+        // Render Functions
+        function renderAll() {
+            renderDoctorsGrid();
+            renderAdminView();
+            renderDoctorView();
+        }
+
+        function renderDoctorsGrid() {
+            const container = document.getElementById('doctorsListGrid');
+            const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
+            const specVal = document.getElementById('specialtyFilter').value;
+            const comVal = document.getElementById('communeFilter').value;
+
+            const docKeys = Object.keys(doctorsData);
+            if (docKeys.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-slate-400">
+                        <i class="fa-solid fa-user-doctor text-4xl mb-2 text-slate-300"></i>
+                        <p>لا يوجد أطباء مسجلون في المنصة حالياً.</p>
+                    </div>`;
+                return;
+            }
+
+            let html = '';
+            let count = 0;
+
+            docKeys.forEach(id => {
+                const doc = doctorsData[id];
+                if (!doc) return;
+
+                // Filtering logic
+                const matchSearch = doc.name.toLowerCase().includes(searchVal) || (doc.address && doc.address.toLowerCase().includes(searchVal));
+                const matchSpec = !specVal || doc.specialty === specVal;
+                const matchCom = !comVal || doc.commune === comVal;
+
+                if (matchSearch && matchSpec && matchCom) {
+                    count++;
+                    html += `
+                        <div class="bg-white rounded-2xl shadow-md hover:shadow-xl transition border border-slate-200 overflow-hidden flex flex-col justify-between">
+                            <div class="p-5">
+                                <div class="flex justify-between items-start mb-3">
+                                    <span class="bg-teal-50 text-teal-800 text-xs px-2.5 py-1 rounded-full font-bold border border-teal-200">${doc.specialty}</span>
+                                    <span class="text-xs text-slate-400 font-semibold"><i class="fa-solid fa-location-dot text-slate-400"></i> ${doc.commune}</span>
+                                </div>
+                                <h3 class="text-xl font-bold text-slate-800 mb-1">${doc.name}</h3>
+                                <p class="text-xs text-slate-500 mb-3"><i class="fa-solid fa-hospital-user ml-1"></i> ${doc.address || 'العنوان غير مدون'}</p>
+                                
+                                <div class="space-y-1.5 text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                    <div><i class="fa-solid fa-clock text-teal-600 ml-1"></i> <strong>أوقات العمل:</strong> ${doc.hours || 'غير محددة'}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="p-4 bg-slate-50 border-t border-slate-100 flex flex-col gap-2">
+                                <button onclick="openBookingModal('${id}', '${doc.name}')" class="w-full bg-teal-700 hover:bg-teal-800 text-white font-bold py-2 rounded-lg text-sm transition shadow-sm flex justify-center items-center gap-1.5">
+                                    <i class="fa-solid fa-calendar-check"></i> احجز موعداً الآن
+                                </button>
+                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                    ${doc.phone ? `<a href="tel:${doc.phone}" class="bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 py-1.5 rounded-lg text-center font-semibold"><i class="fa-solid fa-phone text-emerald-600"></i> اتصال</a>` : ''}
+                                    ${doc.gps ? `<a href="${doc.gps}" target="_blank" class="bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 py-1.5 rounded-lg text-center font-semibold"><i class="fa-solid fa-map-location-dot text-indigo-600"></i> الموقع GPS</a>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            if (count === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500">لا توجد نتائج مطابقة للبحث.</div>`;
+            } else {
+                container.innerHTML = html;
+            }
+        }
+
+        function filterDoctors() {
+            renderDoctorsGrid();
+        }
+
+        // Booking Actions
+        function openBookingModal(docId, docName) {
+            document.getElementById('bookingDoctorId').value = docId;
+            document.getElementById('bookingDocName').innerText = `لدى الطبيب: ${docName}`;
+            openModal('bookingModal');
+        }
+
+        async function submitBookingForm(e) {
+            e.preventDefault();
+            const docId = document.getElementById('bookingDoctorId').value;
+            const name = document.getElementById('patientName').value.trim();
+            const phone = document.getElementById('patientPhone').value.trim();
+            const date = document.getElementById('bookingDate').value;
+            const time = document.getElementById('bookingTime').value;
+
+            const newAppId = 'app_' + Date.now();
+            const payload = {
+                id: newAppId,
+                doctorId: docId,
+                doctorName: doctorsData[docId] ? doctorsData[docId].name : '',
+                patientName: name,
+                patientPhone: phone,
+                date: date,
+                time: time,
+                status: 'pending', // Pending Admin confirmation
+                attended: false,
+                createdAt: new Date().toISOString()
+            };
+
+            await updateFirebasePath(`appointments/${newAppId}`, payload);
+            alert('تم إرسال طلب الحجز بنجاح! سيتم مراجعته وتأكيده من طرف الإدارة مباشرة.');
+            closeModal('bookingModal');
+            e.target.reset();
+        }
+
+        // Admin Control Functions
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const phone = document.getElementById('adminPhoneInput').value.trim();
+            const pass = document.getElementById('adminPassInput').value.trim();
+
+            if (phone === ADMIN_PHONE && pass === ADMIN_PASS) {
+                switchTab('admin');
+                closeModal('adminAuthModal');
+                // Clear fields immediately for complete privacy
+                document.getElementById('adminPhoneInput').value = '';
+                document.getElementById('adminPassInput').value = '';
+            } else {
+                alert('بيانات دخول الإدارة غير صحيحة!');
+            }
+        }
+
+        function renderAdminView() {
+            document.getElementById('adminBaridiInput').value = baridiRip;
+
+            // Render Requests
+            const pendingReqs = Object.values(appointmentsData).filter(a => a && a.status === 'pending');
+            document.getElementById('pendingCount').innerText = pendingReqs.length;
+
+            const reqTable = document.getElementById('adminPendingRequestsTable');
+            if (pendingReqs.length === 0) {
+                reqTable.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500">لا توجد طلبات حجز معلقة حالياً</td></tr>`;
+            } else {
+                reqTable.innerHTML = pendingReqs.map(req => `
+                    <tr class="border-b border-slate-800 hover:bg-slate-800/40">
+                        <td class="p-3 font-semibold text-amber-300">${req.patientName}</td>
+                        <td class="p-3 font-mono text-slate-300">${req.patientPhone}</td>
+                        <td class="p-3 text-slate-200">${req.doctorName}</td>
+                        <td class="p-3 text-xs text-slate-400">${req.date} (${req.time})</td>
+                        <td class="p-3 text-center space-x-2 space-x-reverse">
+                            <button onclick="approveAppointment('${req.id}')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded text-xs font-bold transition">
+                                <i class="fa-solid fa-check ml-1"></i> موافقة وتأكيد (50 دج)
+                            </button>
+                            <button onclick="deleteAppointment('${req.id}')" class="bg-rose-600 hover:bg-rose-500 text-white px-2 py-1 rounded text-xs transition">
+                                إلغاء
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            // Render Doctors Management
+            const docsList = Object.values(doctorsData);
+            document.getElementById('doctorsCount').innerText = docsList.length;
+
+            const docTable = document.getElementById('adminDoctorsTable');
+            if (docsList.length === 0) {
+                docTable.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500">لا يوجد أطباء مسجلين</td></tr>`;
+            } else {
+                docTable.innerHTML = docsList.map(doc => `
+                    <tr class="border-b border-slate-800 hover:bg-slate-800/40">
+                        <td class="p-3 font-bold text-teal-400">${doc.name}</td>
+                        <td class="p-3 text-xs text-slate-300">${doc.specialty}</td>
+                        <td class="p-3 text-xs text-slate-400">${doc.commune} - ${doc.address}</td>
+                        <td class="p-3 font-mono text-xs text-slate-400">${doc.username}</td>
+                        <td class="p-3 text-center">
+                            <button onclick="deleteDoctor('${doc.id}')" class="bg-rose-600/80 hover:bg-rose-600 text-white px-3 py-1 rounded text-xs font-bold transition">
+                                <i class="fa-solid fa-trash ml-1"></i> حذف العيادة فوراً
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        async function approveAppointment(appId) {
+            await fetch(`${FIREBASE_DB_URL}/appointments/${appId}/status.json`, {
+                method: 'PUT',
+                body: JSON.stringify('confirmed')
+            });
+            syncDataFromFirebase();
+        }
+
+        async function deleteAppointment(appId) {
+            if (confirm('هل أنت تأكد من مسح هذا الحجز فورياً؟')) {
+                await deleteFirebasePath(`appointments/${appId}`);
+            }
+        }
+
+        async function deleteDoctor(docId) {
+            if (confirm('تنبيه: هل أنت متأكد من حذف هذه العيادة نهائياً من قاعدة البيانات؟')) {
+                await deleteFirebasePath(`doctors/${docId}`);
+            }
+        }
+
+        async function saveAdminBaridiRip() {
+            const val = document.getElementById('adminBaridiInput').value.trim();
+            if (val) {
+                await updateFirebasePath('settings/baridiRip', val);
+                alert('تم حفظ وتحديث رقم حساب BaridiMob بنجاح!');
+            }
+        }
+
+        async function handleAddDoctor(e) {
+            e.preventDefault();
+            const docId = 'doc_' + Date.now();
+            const payload = {
+                id: docId,
+                name: document.getElementById('newDocName').value.trim(),
+                specialty: document.getElementById('newDocSpec').value,
+                commune: document.getElementById('newDocCommune').value,
+                address: document.getElementById('newDocAddress').value.trim(),
+                phone: document.getElementById('newDocPhone').value.trim(),
+                whatsapp: document.getElementById('newDocWhatsapp').value.trim(),
+                gps: document.getElementById('newDocGps').value.trim(),
+                hours: document.getElementById('newDocHours').value.trim(),
+                username: document.getElementById('newDocUser').value.trim(),
+                password: document.getElementById('newDocPass').value.trim()
+            };
+
+            await updateFirebasePath(`doctors/${docId}`, payload);
+            alert('تم تسجيل وإضافة الطبيب بنجاح!');
+            closeModal('addDoctorModal');
+            e.target.reset();
+        }
+
+        // Doctor Panel Actions
+        function handleDoctorLogin(e) {
+            e.preventDefault();
+            const user = document.getElementById('docLoginUsername').value.trim();
+            const pass = document.getElementById('docLoginPassword').value.trim();
+
+            const doc = Object.values(doctorsData).find(d => d && d.username === user && d.password === pass);
+
+            if (doc) {
+                currentLoggedDoctorId = doc.id;
+                switchTab('doctor');
+                closeModal('doctorAuthModal');
+                document.getElementById('docLoginUsername').value = '';
+                document.getElementById('docLoginPassword').value = '';
+            } else {
+                alert('اسم المستخدم أو كلمة المرور غير صحيحة!');
+            }
+        }
+
+        function renderDoctorView() {
+            if (!currentLoggedDoctorId || !doctorsData[currentLoggedDoctorId]) return;
+
+            const doc = doctorsData[currentLoggedDoctorId];
+            document.getElementById('docPanelName').innerText = doc.name;
+            document.getElementById('docPanelSpec').innerText = `${doc.specialty} - ${doc.commune}`;
+            document.getElementById('docBaridiRipDisplay').innerText = baridiRip;
+
+            // Render Doctor's Confirmed Appointments
+            const myApps = Object.values(appointmentsData).filter(a => a && a.doctorId === currentLoggedDoctorId && a.status === 'confirmed');
+            const table = document.getElementById('doctorAppointmentsTable');
+
+            if (myApps.length === 0) {
+                table.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500">لا توجد حجوزات مؤكدة حالياً</td></tr>`;
+            } else {
+                table.innerHTML = myApps.map(app => `
+                    <tr class="border-b border-slate-200 hover:bg-slate-50">
+                        <td class="p-3 font-bold text-slate-800">${app.patientName}</td>
+                        <td class="p-3 font-mono text-teal-800">${app.patientPhone}</td>
+                        <td class="p-3 text-xs text-slate-600">${app.date} | ${app.time}</td>
+                        <td class="p-3">
+                            ${app.attended ? 
+                                `<span class="bg-emerald-100 text-emerald-800 text-xs px-2 py-0.5 rounded-full font-bold">حضَر</span>` : 
+                                `<span class="bg-slate-100 text-slate-600 text-xs px-2 py-0.5 rounded-full">لم يحضر بعد</span>`
+                            }
+                        </td>
+                        <td class="p-3 text-center space-x-2 space-x-reverse">
+                            <button onclick="toggleAttendance('${app.id}', ${!app.attended})" class="bg-teal-600 hover:bg-teal-700 text-white px-2.5 py-1 rounded text-xs transition">
+                                ${app.attended ? 'إلغاء الحضور' : 'تسجيل حضور'}
+                            </button>
+                            <button onclick="deleteAppointment('${app.id}')" class="bg-rose-100 hover:bg-rose-200 text-rose-700 px-2 py-1 rounded text-xs transition">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        async function toggleAttendance(appId, attendedState) {
+            await fetch(`${FIREBASE_DB_URL}/appointments/${appId}/attended.json`, {
+                method: 'PUT',
+                body: JSON.stringify(attendedState)
+            });
+            syncDataFromFirebase();
+        }
+
+        function openEditDoctorProfile() {
+            if (!currentLoggedDoctorId) return;
+            const doc = doctorsData[currentLoggedDoctorId];
+
+            document.getElementById('editDocName').value = doc.name || '';
+            document.getElementById('editDocAddress').value = doc.address || '';
+            document.getElementById('editDocPhone').value = doc.phone || '';
+            document.getElementById('editDocWhatsapp').value = doc.whatsapp || '';
+            document.getElementById('editDocHours').value = doc.hours || '';
+            document.getElementById('editDocGps').value = doc.gps || '';
+
+            openModal('editDoctorModal');
+        }
+
+        async function handleSaveDoctorProfile(e) {
+            e.preventDefault();
+            if (!currentLoggedDoctorId) return;
+
+            const newPass = document.getElementById('editDocPass').value.trim();
+
+            const updates = {
+                ...doctorsData[currentLoggedDoctorId],
+                name: document.getElementById('editDocName').value.trim(),
+                address: document.getElementById('editDocAddress').value.trim(),
+                phone: document.getElementById('editDocPhone').value.trim(),
+                whatsapp: document.getElementById('editDocWhatsapp').value.trim(),
+                hours: document.getElementById('editDocHours').value.trim(),
+                gps: document.getElementById('editDocGps').value.trim(),
+            };
+
+            if (newPass) {
+                updates.password = newPass;
+            }
+
+            await updateFirebasePath(`doctors/${currentLoggedDoctorId}`, updates);
+            alert('تم حفظ وتحديث بيانات العيادة بنجاح!');
+            closeModal('editDoctorModal');
+        }
+
+        // Navigation Controls
+        function switchTab(tab) {
+            document.getElementById('view-home').classList.add('hidden');
+            document.getElementById('view-doctor').classList.add('hidden');
+            document.getElementById('view-admin').classList.add('hidden');
+
+            if (tab === 'home') document.getElementById('view-home').classList.remove('hidden');
+            if (tab === 'doctor') {
+                renderDoctorView();
+                document.getElementById('view-doctor').classList.remove('hidden');
+            }
+            if (tab === 'admin') {
+                renderAdminView();
+                document.getElementById('view-admin').classList.remove('hidden');
+            }
+        }
+
+        function switchAdminSubTab(sub) {
+            document.getElementById('adminSubTab-requests').classList.add('hidden');
+            document.getElementById('adminSubTab-doctors').classList.add('hidden');
+
+            document.getElementById('adminTabBtn1').className = "py-2 text-slate-400 hover:text-white";
+            document.getElementById('adminTabBtn2').className = "py-2 text-slate-400 hover:text-white";
+
+            if (sub === 'requests') {
+                document.getElementById('adminSubTab-requests').classList.remove('hidden');
+                document.getElementById('adminTabBtn1').className = "py-2 border-b-2 border-amber-400 text-amber-400 font-bold";
+            } else {
+                document.getElementById('adminSubTab-doctors').classList.remove('hidden');
+                document.getElementById('adminTabBtn2').className = "py-2 border-b-2 border-amber-400 text-amber-400 font-bold";
+            }
+        }
+
+        function logoutDoctor() {
+            currentLoggedDoctorId = null;
+            switchTab('home');
+        }
+
+        function logoutAdmin() {
+            switchTab('home');
+        }
+
+        // Modal Helpers
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            document.body.classList.add('modal-active');
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            document.body.classList.remove('modal-active');
+        }
+    </script>
+</body>
+</html>
