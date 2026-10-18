@@ -8,9 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- jsPDF Library for PDF Generation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <!-- html2canvas for Image Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -23,7 +22,7 @@
 </head>
 <body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
 
-    <!-- Header / Navigation -->
+    <!-- Header -->
     <header class="bg-teal-700 text-white shadow-lg sticky top-0 z-50">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('home')">
@@ -41,20 +40,20 @@
         </div>
     </header>
 
-    <!-- Main Content Area -->
+    <!-- Main Content -->
     <main class="container mx-auto px-4 py-6 flex-grow">
 
-        <!-- SECTION 1: PUBLIC BOOKING (حجز المرضى بدون تسجيل) -->
+        <!-- PUBLIC BOOKING TAB -->
         <section id="tab-home" class="tab-content active space-y-6">
             <div class="bg-gradient-to-r from-teal-600 to-teal-800 text-white p-6 rounded-2xl shadow-md text-center">
                 <h2 class="text-2xl font-bold mb-2">احجز موعدك الطبي بسهولة وبدون تسجيل</h2>
-                <p class="text-teal-100 text-sm">اختر الطبيب أو العيادة، أدخل اسمك ورقم هاتفك واكتمل الحجز فوراً!</p>
+                <p class="text-teal-100 text-sm">اختر الطبيب أو العيادة، أدخل بياناتك واحصل على رقم دورك ووصل الحجز فوراً!</p>
             </div>
 
-            <!-- Filters & Search -->
+            <!-- Filters -->
             <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-wrap gap-4 items-center justify-between">
                 <div class="flex-1 min-w-[200px]">
-                    <label class="block text-xs font-bold text-gray-500 mb-1">التخصص الطبى / نوع المنشأة</label>
+                    <label class="block text-xs font-bold text-gray-500 mb-1">التخصص الطبي / المنشأة</label>
                     <select id="filter-specialty" onchange="renderDoctorsPublic()" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-teal-500">
                         <option value="ALL">جميع التخصصات والعيادات</option>
                         <option value="طب عام">طب عام</option>
@@ -62,25 +61,35 @@
                         <option value="أمراض النساء والتوليد">أمراض النساء والتوليد</option>
                         <option value="جراحة العظام">جراحة العظام</option>
                         <option value="أمراض القلب">أمراض القلب</option>
+                        <option value="طب وجراحة العيون">طب وجراحة العيون</option>
                         <option value="طب الأسنان">طب الأسنان</option>
+                        <option value="أمراض الجلد والمقاعد">أمراض الجلد والمقاعد</option>
+                        <option value="أنف وأذن وحنجرة (ENT)">أنف وأذن وحنجرة (ENT)</option>
+                        <option value="أمراض الجهاز الهضمي">أمراض الجهاز الهضمي</option>
+                        <option value="جراحة مخ وأعصاب">جراحة مخ وأعصاب</option>
+                        <option value="الجراحة العامة">الجراحة العامة</option>
+                        <option value="الطب النفسي والأعصاب">الطب النفسي والأعصاب</option>
+                        <option value="أمراض المسالك البولية">أمراض المسالك البولية</option>
+                        <option value="أمراض الغدد الصماء والسكري">أمراض الغدد الصماء والسكري</option>
+                        <option value="أمراض الرئة والجهاز التنفسي">أمراض الرئة والجهاز التنفسي</option>
+                        <option value="أمراض الكلى">أمراض الكلى</option>
+                        <option value="التغذية والتخسيس">التغذية والتخسيس</option>
+                        <option value="العلاج الفيزيائي وإعادة التأهيل">العلاج الفيزيائي وإعادة التأهيل</option>
+                        <option value="أمراض الدم والأورام">أمراض الدم والأورام</option>
                         <option value="عيادة متخصصة / مجمع طبي">عيادة متخصصة / مجمع طبي</option>
                     </select>
                 </div>
                 <div class="flex-1 min-w-[200px]">
-                    <label class="block text-xs font-bold text-gray-500 mb-1">البحث بالاسم</label>
-                    <input type="text" id="search-name" oninput="renderDoctorsPublic()" placeholder="ابحث عن اسم طبيب أو عيادة..." class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-teal-500">
+                    <label class="block text-xs font-bold text-gray-500 mb-1">البحث باسم الطبيب أو العيادة</label>
+                    <input type="text" id="search-name" oninput="renderDoctorsPublic()" placeholder="اكتب اسم الطبيب أو العيادة..." class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-teal-500">
                 </div>
             </div>
 
-            <!-- Doctors Grid -->
-            <div id="public-doctors-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Data populated dynamically -->
-            </div>
+            <div id="public-doctors-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </section>
 
-        <!-- SECTION 2: DOCTOR / CLINIC DASHBOARD & AUTH -->
+        <!-- DOCTOR / CLINIC AUTH & DASHBOARD -->
         <section id="tab-doctor-auth" class="tab-content space-y-6">
-            <!-- Doctor Login / Register Forms (If not logged in) -->
             <div id="doctor-logged-out" class="max-w-xl mx-auto bg-white p-6 rounded-2xl shadow-md border border-gray-100">
                 <div class="flex border-b mb-6">
                     <button id="btn-show-login" onclick="toggleAuthForm('login')" class="w-1/2 py-3 font-bold text-teal-700 border-b-2 border-teal-700">تسجيل الدخول</button>
@@ -90,8 +99,8 @@
                 <!-- Login Form -->
                 <form id="form-doctor-login" onsubmit="handleDoctorLogin(event)" class="space-y-4">
                     <div>
-                        <label class="block text-sm font-semibold mb-1">البريد الإلكتروني أو رقم الهاتف</label>
-                        <input type="text" id="login-identifier" required class="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-teal-500 outline-none">
+                        <label class="block text-sm font-semibold mb-1">رقم الهاتف (الأساسي) أو البريد الإلكتروني</label>
+                        <input type="text" id="login-identifier" required placeholder="06XXXXXXXX" class="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-teal-500 outline-none">
                     </div>
                     <div>
                         <label class="block text-sm font-semibold mb-1">كلمة السر</label>
@@ -107,46 +116,60 @@
                             <label class="block text-sm font-semibold mb-1">نوع الحساب</label>
                             <select id="reg-type" onchange="toggleClinicFields()" class="w-full border rounded-lg p-2.5 text-sm outline-none">
                                 <option value="doctor">طبيب مستقل</option>
-                                <option value="clinic">عيادة متعددة التخصصات</option>
+                                <option value="clinic">عيادة / مجمع طبي</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold mb-1">اسم الطبيب / العيادة</label>
-                            <input type="text" id="reg-name" placeholder="د. أحمد / عيادة الشفاء" required class="w-full border rounded-lg p-2.5 text-sm outline-none">
+                            <label class="block text-sm font-semibold mb-1">اسم الطبيب أو العيادة</label>
+                            <input type="text" id="reg-name" placeholder="مثال: عيادة القرنية لطب وجراحة العيون" required class="w-full border rounded-lg p-2.5 text-sm outline-none">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-semibold mb-1">البريد الإلكتروني</label>
-                            <input type="email" id="reg-email" required class="w-full border rounded-lg p-2.5 text-sm outline-none">
+                            <label class="block text-sm font-semibold mb-1">رقم الهاتف <span class="text-red-500">* (إجباري)</span></label>
+                            <input type="tel" id="reg-phone" placeholder="06XXXXXXXX" required class="w-full border rounded-lg p-2.5 text-sm outline-none">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold mb-1">رقم الهاتف</label>
-                            <input type="tel" id="reg-phone" placeholder="06XXXXXXXX" required class="w-full border rounded-lg p-2.5 text-sm outline-none">
+                            <label class="block text-sm font-semibold mb-1">البريد الإلكتروني <span class="text-gray-400 text-xs">(اختياري)</span></label>
+                            <input type="email" id="reg-email" placeholder="example@domain.com" class="w-full border rounded-lg p-2.5 text-sm outline-none">
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold mb-1">التخصص الرئيسي</label>
+                        <label class="block text-sm font-semibold mb-1">التخصص الطبى</label>
                         <select id="reg-specialty" class="w-full border rounded-lg p-2.5 text-sm outline-none">
                             <option value="طب عام">طب عام</option>
                             <option value="طب الأطفال">طب الأطفال</option>
                             <option value="أمراض النساء والتوليد">أمراض النساء والتوليد</option>
                             <option value="جراحة العظام">جراحة العظام</option>
                             <option value="أمراض القلب">أمراض القلب</option>
+                            <option value="طب وجراحة العيون">طب وجراحة العيون</option>
                             <option value="طب الأسنان">طب الأسنان</option>
+                            <option value="أمراض الجلد والمقاعد">أمراض الجلد والمقاعد</option>
+                            <option value="أنف وأذن وحنجرة (ENT)">أنف وأذن وحنجرة (ENT)</option>
+                            <option value="أمراض الجهاز الهضمي">أمراض الجهاز الهضمي</option>
+                            <option value="جراحة مخ وأعصاب">جراحة مخ وأعصاب</option>
+                            <option value="الجراحة العامة">الجراحة العامة</option>
+                            <option value="الطب النفسي والأعصاب">الطب النفسي والأعصاب</option>
+                            <option value="أمراض المسالك البولية">أمراض المسالك البولية</option>
+                            <option value="أمراض الغدد الصماء والسكري">أمراض الغدد الصماء والسكري</option>
+                            <option value="أمراض الرئة والجهاز التنفسي">أمراض الرئة والجهاز التنفسي</option>
+                            <option value="أمراض الكلى">أمراض الكلى</option>
+                            <option value="التغذية والتخسيس">التغذية والتخسيس</option>
+                            <option value="العلاج الفيزيائي وإعادة التأهيل">العلاج الفيزيائي وإعادة التأهيل</option>
+                            <option value="أمراض الدم والأورام">أمراض الدم والأورام</option>
                             <option value="عيادة متخصصة / مجمع طبي">عيادة متخصصة / مجمع طبي</option>
                         </select>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold mb-1">صورة العيادة / الطبيب (تحميل مباشر من الجهاز)</label>
+                        <label class="block text-sm font-semibold mb-1">صورة الطبيب / العيادة (من الهاتف)</label>
                         <input type="file" id="reg-image" accept="image/*" class="w-full border rounded-lg p-2 text-sm">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold mb-1">رابط موقع العيادة على خرائط جوجل (Google Maps)</label>
+                        <label class="block text-sm font-semibold mb-1">رابط خرائط جوجل (Google Maps)</label>
                         <input type="url" id="reg-map" placeholder="https://maps.google.com/..." class="w-full border rounded-lg p-2.5 text-sm outline-none">
                     </div>
 
@@ -157,32 +180,30 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-semibold mb-1">أيام وأوقات العمل الجراحي</label>
+                            <label class="block text-sm font-semibold mb-1">أيام الجراحة</label>
                             <input type="text" id="reg-surgery" placeholder="مثال: الإثنين صباحاً" class="w-full border rounded-lg p-2.5 text-sm outline-none">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold mb-1">تحديد الطبيب المنيب (Remplaçant)</label>
+                            <label class="block text-sm font-semibold mb-1">الطبيب البديل (Remplaçant)</label>
                             <input type="text" id="reg-replacement" placeholder="اسم الطبيب البديل إن وجد" class="w-full border rounded-lg p-2.5 text-sm outline-none">
                         </div>
                     </div>
 
-                    <!-- Dynamic Sub-Doctors section for Clinics -->
                     <div id="clinic-doctors-container" class="hidden border-t pt-4 space-y-3">
                         <label class="block text-sm font-bold text-teal-800">أطباء العيادة واختصاصاتهم</label>
                         <div id="sub-doctors-list" class="space-y-2"></div>
                         <button type="button" onclick="addSubDoctorInput()" class="text-xs bg-gray-200 hover:bg-gray-300 font-bold px-3 py-1.5 rounded-lg"><i class="fa-solid fa-plus ml-1"></i> إضافة طبيب آخر للعيادة</button>
                     </div>
 
-                    <!-- BaridiMob / Payment Upload -->
                     <div class="bg-amber-50 p-4 rounded-xl border border-amber-200 space-y-2">
-                        <h4 class="font-bold text-amber-800 text-sm"><i class="fa-solid fa-receipt ml-1"></i> معلومات اشتراك المنصة</h4>
-                        <p class="text-xs text-amber-900">يرجى دفع قيمة الاشتراك الشهري للحساب البريدي بريدي موب التالي:</p>
+                        <h4 class="font-bold text-amber-800 text-sm"><i class="fa-solid fa-receipt ml-1"></i> دفع الاشتراك البريدي (اختياري)</h4>
+                        <p class="text-xs text-amber-900">يمكنك دفع الاشتراك عبر البريد وإرفاق الوصل الآن أو لاحقاً:</p>
                         <div class="bg-white p-2.5 rounded border text-center font-mono font-bold text-teal-800 text-sm select-all">
                             CCP / RIP: <span id="display-admin-ccp">جاري التحميل...</span>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold mb-1 text-gray-700">تحميل وصل دفع الاشتراك (صورة الوصل)</label>
-                            <input type="file" id="reg-receipt" accept="image/*" required class="w-full border bg-white rounded-lg p-1.5 text-xs">
+                            <label class="block text-xs font-semibold mb-1 text-gray-700">تحميل وصل الاشتراك (اختياري)</label>
+                            <input type="file" id="reg-receipt" accept="image/*" class="w-full border bg-white rounded-lg p-1.5 text-xs">
                         </div>
                     </div>
 
@@ -191,11 +212,11 @@
                         <input type="password" id="reg-password" required class="w-full border rounded-lg p-2.5 text-sm outline-none">
                     </div>
 
-                    <button type="submit" class="w-full bg-teal-600 text-white font-bold py-3 rounded-lg hover:bg-teal-700 transition">إرسال طلب الانضمام</button>
+                    <button type="submit" class="w-full bg-teal-600 text-white font-bold py-3 rounded-lg hover:bg-teal-700 transition">إرسال طلب التسجيل</button>
                 </form>
             </div>
 
-            <!-- Doctor Logged-In Panel -->
+            <!-- Doctor Logged In Panel -->
             <div id="doctor-logged-in" class="hidden space-y-6">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border flex flex-wrap justify-between items-center gap-4">
                     <div class="flex items-center gap-4">
@@ -208,568 +229,56 @@
                     <button onclick="handleDoctorLogout()" class="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-red-100 transition"><i class="fa-solid fa-right-from-bracket ml-1"></i> تسجيل الخروج</button>
                 </div>
 
-                <!-- Patients List for Doctor -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border space-y-4">
                     <div class="flex flex-wrap justify-between items-center gap-4">
-                        <h3 class="text-lg font-bold text-teal-800"><i class="fa-solid fa-users ml-2"></i> قائمة المرضى الحاجزين</h3>
-                        <button onclick="downloadPatientsPDF()" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2">
-                            <i class="fa-solid fa-file-pdf"></i> تحميل القائمة PDF
+                        <h3 class="text-lg font-bold text-teal-800"><i class="fa-solid fa-users ml-2"></i> قائمة المرضى الحاجزين (تحديث لحظي)</h3>
+                        <button onclick="downloadPatientsImagePDF()" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2">
+                            <i class="fa-solid fa-file-pdf"></i> تحميل القائمة PDF (واضحة وبدون تشفير)
                         </button>
                     </div>
 
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-right border-collapse">
+                    <div id="pdf-printable-area" class="overflow-x-auto bg-white p-2">
+                        <table class="w-full text-right border-collapse min-w-[600px]">
                             <thead>
-                                <tr class="bg-gray-100 text-gray-700 text-sm">
-                                    <th class="p-3">#</th>
-                                    <th class="p-3">اسم المريض ولقبه</th>
-                                    <th class="p-3">رقم الهاتف</th>
-                                    <th class="p-3">الطبيب المستهدف</th>
-                                    <th class="p-3">تاريخ ووقت الحجز</th>
-                                    <th class="p-3">الحالة</th>
-                                    <th class="p-3 text-center">إجراءات</th>
+                                <tr class="bg-teal-700 text-white text-sm">
+                                    <th class="p-3 border"># رقم التسجيل</th>
+                                    <th class="p-3 border">اسم المريض ولقبه</th>
+                                    <th class="p-3 border">رقم الهاتف</th>
+                                    <th class="p-3 border">الطبيب المستهدف</th>
+                                    <th class="p-3 border">تاريخ ووقت الحجز</th>
+                                    <th class="p-3 border">الحالة</th>
+                                    <th class="p-3 border text-center no-print">إجراءات</th>
                                 </tr>
                             </thead>
-                            <tbody id="doctor-patients-table" class="text-sm divide-y">
-                                <!-- Dynamic rows -->
-                            </tbody>
+                            <tbody id="doctor-patients-table" class="text-sm divide-y"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
         </section>
-
     </main>
 
-    <!-- ADMIN MODAL (لوحة الأدمن المخفية والسرية) -->
+    <!-- ADMIN MODAL -->
     <div id="admin-modal" class="fixed inset-0 bg-black/60 hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-6 shadow-2xl">
             <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-user-shield text-teal-600 ml-2"></i> لوحة تحكم الأدمن (منصة طبيب شلف)</h3>
+                <h3 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-user-shield text-teal-600 ml-2"></i> لوحة أدمن منصة طبيب شلف</h3>
                 <button onclick="closeAdminModal()" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
             </div>
 
-            <!-- Admin Auth Form -->
             <div id="admin-login-form" class="space-y-4 max-w-sm mx-auto py-6">
-                <p class="text-xs text-gray-500 text-center">يرجى إدخال بيانات الأدمن السرية لتسجيل الدخول</p>
                 <div>
                     <label class="block text-sm font-semibold mb-1">رقم هاتف الأدمن</label>
-                    <input type="text" id="admin-phone-input" placeholder="**********" class="w-full border rounded-lg p-2.5 text-sm outline-none">
+                    <input type="text" id="admin-phone-input" placeholder="0670800009" class="w-full border rounded-lg p-2.5 text-sm outline-none">
                 </div>
                 <div>
                     <label class="block text-sm font-semibold mb-1">الرقم السري</label>
-                    <input type="password" id="admin-pass-input" placeholder="**" class="w-full border rounded-lg p-2.5 text-sm outline-none">
+                    <input type="password" id="admin-pass-input" placeholder="27" class="w-full border rounded-lg p-2.5 text-sm outline-none">
                 </div>
-                <button onclick="handleAdminLogin()" class="w-full bg-teal-700 text-white font-bold py-2.5 rounded-lg hover:bg-teal-800 transition">دخول لوحة الأدمن</button>
+                <button onclick="handleAdminLogin()" class="w-full bg-teal-700 text-white font-bold py-2.5 rounded-lg hover:bg-teal-800 transition">دخول لوحة التحكم</button>
             </div>
 
-            <!-- Admin Content (Unlocked) -->
             <div id="admin-dashboard-content" class="hidden space-y-6">
-                <!-- Settings: CCP BaridiMob -->
                 <div class="bg-teal-50 p-4 rounded-xl border border-teal-200 space-y-3">
-                    <h4 class="font-bold text-teal-900 text-sm">تعديل رقم الحساب البريدي BaridiMob للإشتراكات</h4>
-                    <div class="flex gap-2">
-                        <input type="text" id="admin-ccp-input" class="flex-1 border rounded-lg p-2 text-sm font-mono" placeholder="أدخل رقم RIP / CCP الخاص بك">
-                        <button onclick="saveAdminCCP()" class="bg-teal-700 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-teal-800">حفظ الرقم</button>
-                    </div>
-                </div>
-
-                <!-- Doctors Approval List -->
-                <div class="space-y-3">
-                    <h4 class="font-bold text-gray-800">طلبات انضمام الأطباء والعيادات (مراجعة وتفعيل الاشتراكات)</h4>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-right border-collapse">
-                            <thead>
-                                <tr class="bg-gray-100 text-gray-700 text-xs">
-                                    <th class="p-2">الاسم</th>
-                                    <th class="p-2">الهاتف/البريد</th>
-                                    <th class="p-2">النوع</th>
-                                    <th class="p-2">وصل الدفع</th>
-                                    <th class="p-2">الحالة</th>
-                                    <th class="p-2 text-center">التحكم</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-doctors-table" class="text-xs divide-y">
-                                <!-- Dynamic rows -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- BOOKING MODAL FOR PUBLIC -->
-    <div id="booking-modal" class="fixed inset-0 bg-black/60 hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center border-b pb-2">
-                <h3 class="text-lg font-bold text-teal-800" id="booking-modal-title">تأكيد حجز الموعد</h3>
-                <button onclick="closeBookingModal()" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
-            </div>
-            <form onsubmit="submitPatientBooking(event)" class="space-y-3">
-                <input type="hidden" id="book-doc-id">
-                <div id="sub-doc-selection-container" class="hidden">
-                    <label class="block text-xs font-bold text-gray-700 mb-1">اختر الطبيب داخل العيادة</label>
-                    <select id="book-sub-doctor" class="w-full border rounded-lg p-2 text-sm outline-none"></select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">الاسم واللقب</label>
-                    <input type="text" id="patient-fullname" required placeholder="أدخل اسمك الكامل" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-teal-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">رقم الهاتف</label>
-                    <input type="tel" id="patient-phone" required placeholder="06XXXXXXXX" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-teal-500">
-                </div>
-                <button type="submit" class="w-full bg-teal-600 text-white font-bold py-3 rounded-lg hover:bg-teal-700 transition">تأكيد الحجز المباشر</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-gray-300 py-4 mt-auto text-center text-sm border-t border-gray-700">
-        <p>جميع حقوق النشر محفوظة © <span id="year"></span> منصة <strong>طبيب شلف</strong> - تطوير وإدارة: <strong>طيب أحمد عبد الكريم</strong></p>
-    </footer>
-
-    <!-- JavaScript Application Logic -->
-    <script>
-        // 1. Firebase Initialization
-        const firebaseConfig = {
-            databaseURL: "https://tabib-chlef-default-rtdb.firebaseio.com"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        // Admin Credentials
-        const ADMIN_PHONE = "0670800009";
-        const ADMIN_PASS = "27";
-
-        // Global State
-        let allDoctors = {};
-        let currentDoctorUser = null;
-        let adminCcpNumber = "";
-
-        document.getElementById('year').innerText = new Date().getFullYear();
-
-        // Realtime Listener on Database
-        db.ref('doctors').on('value', (snapshot) => {
-            allDoctors = snapshot.val() || {};
-            renderDoctorsPublic();
-            if (currentDoctorUser && allDoctors[currentDoctorUser.id]) {
-                currentDoctorUser = { id: currentDoctorUser.id, ...allDoctors[currentDoctorUser.id] };
-                renderDoctorDashboard();
-            }
-            renderAdminTable();
-        });
-
-        db.ref('settings/admin_ccp').on('value', (snapshot) => {
-            adminCcpNumber = snapshot.val() || "00000000000000";
-            document.getElementById('display-admin-ccp').innerText = adminCcpNumber;
-            document.getElementById('admin-ccp-input').value = adminCcpNumber;
-        });
-
-        // Tab Switching
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.getElementById(`tab-${tabId}`).classList.add('active');
-        }
-
-        function toggleAuthForm(mode) {
-            if (mode === 'login') {
-                document.getElementById('form-doctor-login').classList.remove('hidden');
-                document.getElementById('form-doctor-register').classList.add('hidden');
-                document.getElementById('btn-show-login').className = "w-1/2 py-3 font-bold text-teal-700 border-b-2 border-teal-700";
-                document.getElementById('btn-show-register').className = "w-1/2 py-3 font-bold text-gray-500";
-            } else {
-                document.getElementById('form-doctor-login').classList.add('hidden');
-                document.getElementById('form-doctor-register').classList.remove('hidden');
-                document.getElementById('btn-show-register').className = "w-1/2 py-3 font-bold text-teal-700 border-b-2 border-teal-700";
-                document.getElementById('btn-show-login').className = "w-1/2 py-3 font-bold text-gray-500";
-            }
-        }
-
-        function toggleClinicFields() {
-            const type = document.getElementById('reg-type').value;
-            const clinicContainer = document.getElementById('clinic-doctors-container');
-            if (type === 'clinic') {
-                clinicContainer.classList.remove('hidden');
-                if(document.getElementById('sub-doctors-list').children.length === 0) {
-                    addSubDoctorInput();
-                }
-            } else {
-                clinicContainer.classList.add('hidden');
-            }
-        }
-
-        function addSubDoctorInput() {
-            const div = document.createElement('div');
-            div.className = "flex gap-2 items-center";
-            div.innerHTML = `
-                <input type="text" placeholder="اسم الطبيب" class="sub-doc-name w-1/2 border rounded p-2 text-xs outline-none" required>
-                <input type="text" placeholder="الاختصاص" class="sub-doc-spec w-1/2 border rounded p-2 text-xs outline-none" required>
-                <button type="button" onclick="this.parentElement.remove()" class="text-red-500 px-2"><i class="fa-solid fa-trash"></i></button>
-            `;
-            document.getElementById('sub-doctors-list').appendChild(div);
-        }
-
-        // Helper: Convert File to Base64
-        function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                if(!file) return resolve("");
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-            });
-        }
-
-        // Handle Doctor Registration
-        async function handleDoctorRegister(e) {
-            e.preventDefault();
-            const imgFile = document.getElementById('reg-image').files[0];
-            const receiptFile = document.getElementById('reg-receipt').files[0];
-
-            const imageBase64 = imgFile ? await fileToBase64(imgFile) : "";
-            const receiptBase64 = receiptFile ? await fileToBase64(receiptFile) : "";
-
-            // Collect Clinic Sub-Doctors if applicable
-            const subDoctors = [];
-            if(document.getElementById('reg-type').value === 'clinic') {
-                document.querySelectorAll('#sub-doctors-list > div').forEach(row => {
-                    const name = row.querySelector('.sub-doc-name').value;
-                    const spec = row.querySelector('.sub-doc-spec').value;
-                    if(name && spec) subDoctors.push({ name, spec });
-                });
-            }
-
-            const docId = 'doc_' + Date.now();
-            const newDoctor = {
-                id: docId,
-                type: document.getElementById('reg-type').value,
-                name: document.getElementById('reg-name').value,
-                email: document.getElementById('reg-email').value,
-                phone: document.getElementById('reg-phone').value,
-                specialty: document.getElementById('reg-specialty').value,
-                image: imageBase64,
-                mapUrl: document.getElementById('reg-map').value,
-                schedule: document.getElementById('reg-schedule').value,
-                surgerySchedule: document.getElementById('reg-surgery').value,
-                replacement: document.getElementById('reg-replacement').value,
-                subDoctors: subDoctors,
-                receiptImage: receiptBase64,
-                password: document.getElementById('reg-password').value,
-                approved: false, // Requires Admin Approval
-                createdAt: new Date().toISOString()
-            };
-
-            await db.ref('doctors/' + docId).set(newDoctor);
-            alert('تم إرسال طلب الانضمام بنجاح! سيتم مراجعة وصل الدفع وتفعيل حسابك من طرف الأدمن قريباً.');
-            document.getElementById('form-doctor-register').reset();
-            toggleAuthForm('login');
-        }
-
-        // Handle Doctor Login
-        function handleDoctorLogin(e) {
-            e.preventDefault();
-            const iden = document.getElementById('login-identifier').value.trim();
-            const pass = document.getElementById('login-password').value.trim();
-
-            const foundKey = Object.keys(allDoctors).find(k => {
-                const d = allDoctors[k];
-                return (d.email === iden || d.phone === iden) && d.password === pass;
-            });
-
-            if (foundKey) {
-                currentDoctorUser = { id: foundKey, ...allDoctors[foundKey] };
-                document.getElementById('doctor-logged-out').classList.add('hidden');
-                document.getElementById('doctor-logged-in').classList.remove('hidden');
-                renderDoctorDashboard();
-            } else {
-                alert('خطأ في بيانات الدخول! تأكد من البريد/الهاتف وكلمة السر.');
-            }
-        }
-
-        function handleDoctorLogout() {
-            currentDoctorUser = null;
-            document.getElementById('doctor-logged-in').classList.add('hidden');
-            document.getElementById('doctor-logged-out').classList.remove('hidden');
-        }
-
-        // Render Doctor Dashboard Data
-        function renderDoctorDashboard() {
-            if (!currentDoctorUser) return;
-            document.getElementById('doc-profile-name').innerText = currentDoctorUser.name;
-            document.getElementById('doc-profile-img').src = currentDoctorUser.image || 'https://via.placeholder.com/150';
-            
-            const statusEl = document.getElementById('doc-profile-status');
-            if(currentDoctorUser.approved) {
-                statusEl.className = "text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded inline-block";
-                statusEl.innerHTML = '<i class="fa-solid fa-circle-check ml-1"></i> الحساب مفعل ومتاح للحجز';
-            } else {
-                statusEl.className = "text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-1 rounded inline-block";
-                statusEl.innerHTML = '<i class="fa-solid fa-clock ml-1"></i> الحساب قيد المراجعة والتفعيل من الأدمن';
-            }
-
-            // Render Patients
-            const tableBody = document.getElementById('doctor-patients-table');
-            tableBody.innerHTML = '';
-            
-            db.ref(`appointments/${currentDoctorUser.id}`).on('value', snapshot => {
-                const appointments = snapshot.val() || {};
-                tableBody.innerHTML = '';
-                let index = 1;
-
-                Object.keys(appointments).forEach(appId => {
-                    const app = appointments[appId];
-                    const tr = document.createElement('tr');
-                    tr.className = "hover:bg-gray-50";
-                    tr.innerHTML = `
-                        <td class="p-3 font-bold">${index++}</td>
-                        <td class="p-3 font-semibold text-gray-800">${app.patientName}</td>
-                        <td class="p-3 font-mono text-teal-700">${app.patientPhone}</td>
-                        <td class="p-3">${app.subDoctorName || 'الطبيب الرئيسي'}</td>
-                        <td class="p-3 text-xs text-gray-500">${new Date(app.timestamp).toLocaleString('ar-DZ')}</td>
-                        <td class="p-3">
-                            <span class="px-2 py-1 rounded text-xs font-bold ${app.attended ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}">
-                                ${app.attended ? 'حضر' : 'لم يحضر بعد'}
-                            </span>
-                        </td>
-                        <td class="p-3 text-center space-x-1 space-x-reverse">
-                            <button onclick="toggleAttendance('${currentDoctorUser.id}', '${appId}', ${!app.attended})" class="text-xs bg-teal-100 text-teal-800 px-2 py-1 rounded font-bold hover:bg-teal-200">
-                                ${app.attended ? 'إلغاء الحضور' : 'تسجيل حضور'}
-                            </button>
-                            <button onclick="deleteAppointment('${currentDoctorUser.id}', '${appId}')" class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded font-bold hover:bg-red-200">حذف</button>
-                        </td>
-                    `;
-                    tableBody.appendChild(tr);
-                });
-            });
-        }
-
-        async function toggleAttendance(docId, appId, status) {
-            await db.ref(`appointments/${docId}/${appId}/attended`).set(status);
-        }
-
-        async function deleteAppointment(docId, appId) {
-            if(confirm('هل أنت متأكد من حذف هذا الحجز نهائياً؟')) {
-                await db.ref(`appointments/${docId}/${appId}`).remove();
-            }
-        }
-
-        // Export Patient List to PDF
-        function downloadPatientsPDF() {
-            if (!currentDoctorUser) return;
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-
-            doc.setFontSize(16);
-            doc.text(`قائمة المرضى - ${currentDoctorUser.name}`, 140, 15, { align: 'right' });
-            doc.setFontSize(10);
-            doc.text(`منصة طبيب شلف - ${new Date().toLocaleDateString('ar-DZ')}`, 140, 22, { align: 'right' });
-
-            const tableData = [];
-            db.ref(`appointments/${currentDoctorUser.id}`).once('value', snapshot => {
-                const data = snapshot.val() || {};
-                let i = 1;
-                Object.values(data).forEach(app => {
-                    tableData.push([
-                        app.attended ? 'حضر' : 'لم يحضر',
-                        new Date(app.timestamp).toLocaleDateString('ar-DZ'),
-                        app.subDoctorName || '-',
-                        app.patientPhone,
-                        app.patientName,
-                        i++
-                    ]);
-                });
-
-                doc.autoTable({
-                    head: [['الحالة', 'التاريخ', 'الطبيب المستهدف', 'رقم الهاتف', 'اسم المريض', '#']],
-                    body: tableData,
-                    startY: 30,
-                    styles: { halign: 'right' }
-                });
-
-                doc.save(`قائمة_المرضى_${currentDoctorUser.name}.pdf`);
-            });
-        }
-
-        // Render Public Doctors Cards
-        function renderDoctorsPublic() {
-            const grid = document.getElementById('public-doctors-list');
-            grid.innerHTML = '';
-
-            const selectedSpec = document.getElementById('filter-specialty').value;
-            const searchKeyword = document.getElementById('search-name').value.toLowerCase();
-
-            Object.keys(allDoctors).forEach(key => {
-                const doc = allDoctors[key];
-                if (!doc.approved) return;
-
-                if (selectedSpec !== 'ALL' && doc.specialty !== selectedSpec) return;
-                if (searchKeyword && !doc.name.toLowerCase().includes(searchKeyword)) return;
-
-                const card = document.createElement('div');
-                card.className = "bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition flex flex-col justify-between";
-                
-                let subDocsHTML = '';
-                if (doc.type === 'clinic' && doc.subDoctors) {
-                    subDocsHTML = `<div class="mt-2 text-xs text-gray-600 bg-teal-50 p-2 rounded">
-                        <strong>الأطباء المتاحون:</strong> ${doc.subDoctors.map(s => `${s.name} (${s.spec})`).join(', ')}
-                    </div>`;
-                }
-
-                card.innerHTML = `
-                    <div class="p-5 space-y-3">
-                        <div class="flex items-center gap-4">
-                            <img src="${doc.image || 'https://via.placeholder.com/150'}" class="w-16 h-16 rounded-xl object-cover border">
-                            <div>
-                                <span class="text-xs bg-teal-100 text-teal-800 font-bold px-2 py-0.5 rounded-full">${doc.specialty}</span>
-                                <h3 class="font-bold text-gray-800 text-base mt-1">${doc.name}</h3>
-                                ${doc.mapUrl ? `<a href="${doc.mapUrl}" target="_blank" class="text-xs text-blue-600 hover:underline"><i class="fa-solid fa-location-dot ml-1"></i> خرائط جوجل</a>` : ''}
-                            </div>
-                        </div>
-
-                        <div class="text-xs space-y-1 text-gray-600 bg-gray-50 p-3 rounded-lg">
-                            <p><strong><i class="fa-solid fa-clock ml-1"></i> أوقات العمل:</strong> ${doc.schedule || 'غير محدد'}</p>
-                            ${doc.surgerySchedule ? `<p><strong><i class="fa-solid fa-scalpel ml-1"></i> المواعيد الجراحية:</strong> ${doc.surgerySchedule}</p>` : ''}
-                            ${doc.replacement ? `<p><strong><i class="fa-solid fa-user-doctor ml-1"></i> الطبيب البديل:</strong> ${doc.replacement}</p>` : ''}
-                        </div>
-
-                        ${subDocsHTML}
-                    </div>
-
-                    <div class="p-4 bg-gray-50 border-t">
-                        <button onclick="openBookingModal('${doc.id}')" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 rounded-xl text-sm transition">
-                            <i class="fa-solid fa-calendar-plus ml-1"></i> حجز موعد سريع
-                        </button>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-        // Booking Modal Logic
-        function openBookingModal(docId) {
-            const doc = allDoctors[docId];
-            if(!doc) return;
-
-            document.getElementById('book-doc-id').value = docId;
-            document.getElementById('booking-modal-title').innerText = `حجز موعد عند: ${doc.name}`;
-
-            const subContainer = document.getElementById('sub-doc-selection-container');
-            const subSelect = document.getElementById('book-sub-doctor');
-            subSelect.innerHTML = '';
-
-            if (doc.type === 'clinic' && doc.subDoctors && doc.subDoctors.length > 0) {
-                subContainer.classList.remove('hidden');
-                doc.subDoctors.forEach(sub => {
-                    const opt = document.createElement('option');
-                    opt.value = `${sub.name} - ${sub.spec}`;
-                    opt.innerText = `${sub.name} (${sub.spec})`;
-                    subSelect.appendChild(opt);
-                });
-            } else {
-                subContainer.classList.add('hidden');
-            }
-
-            document.getElementById('booking-modal').classList.remove('hidden');
-        }
-
-        function closeBookingModal() {
-            document.getElementById('booking-modal').classList.add('hidden');
-        }
-
-        async function submitPatientBooking(e) {
-            e.preventDefault();
-            const docId = document.getElementById('book-doc-id').value;
-            const patientName = document.getElementById('patient-fullname').value;
-            const patientPhone = document.getElementById('patient-phone').value;
-            const subDocSelect = document.getElementById('book-sub-doctor');
-            const subDoctorName = !document.getElementById('sub-doc-selection-container').classList.contains('hidden') ? subDocSelect.value : '';
-
-            const appointmentId = 'app_' + Date.now();
-            await db.ref(`appointments/${docId}/${appointmentId}`).set({
-                id: appointmentId,
-                patientName,
-                patientPhone,
-                subDoctorName,
-                attended: false,
-                timestamp: new Date().toISOString()
-            });
-
-            alert('تم الحجز بنجاح!');
-            closeBookingModal();
-            document.getElementById('patient-fullname').value = '';
-            document.getElementById('patient-phone').value = '';
-        }
-
-        // Admin Hidden Modal
-        function openAdminModal() {
-            document.getElementById('admin-modal').classList.remove('hidden');
-        }
-
-        function closeAdminModal() {
-            document.getElementById('admin-modal').classList.add('hidden');
-        }
-
-        function handleAdminLogin() {
-            const phone = document.getElementById('admin-phone-input').value.trim();
-            const pass = document.getElementById('admin-pass-input').value.trim();
-
-            if (phone === ADMIN_PHONE && pass === ADMIN_PASS) {
-                document.getElementById('admin-login-form').classList.add('hidden');
-                document.getElementById('admin-dashboard-content').classList.remove('hidden');
-                renderAdminTable();
-            } else {
-                alert('بيانات الأدمن غير صحيحة!');
-            }
-        }
-
-        async function saveAdminCCP() {
-            const ccp = document.getElementById('admin-ccp-input').value.trim();
-            await db.ref('settings/admin_ccp').set(ccp);
-            alert('تم حفظ رقم الحساب البريدي بنجاح!');
-        }
-
-        function renderAdminTable() {
-            const tableBody = document.getElementById('admin-doctors-table');
-            if(!tableBody) return;
-            tableBody.innerHTML = '';
-
-            Object.keys(allDoctors).forEach(id => {
-                const doc = allDoctors[id];
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-gray-50";
-                tr.innerHTML = `
-                    <td class="p-2 font-bold">${doc.name}</td>
-                    <td class="p-2">${doc.phone}<br><span class="text-gray-400">${doc.email}</span></td>
-                    <td class="p-2">${doc.type === 'clinic' ? 'عيادة' : 'طبيب'}</td>
-                    <td class="p-2">
-                        ${doc.receiptImage ? `<a href="${doc.receiptImage}" target="_blank" class="text-blue-600 underline">عرض الوصل</a>` : 'لا يوجد'}
-                    </td>
-                    <td class="p-2 font-bold ${doc.approved ? 'text-green-600' : 'text-amber-600'}">
-                        ${doc.approved ? 'مفعل' : 'معلق'}
-                    </td>
-                    <td class="p-2 text-center space-x-1 space-x-reverse">
-                        <button onclick="toggleDoctorApproval('${doc.id}', ${!doc.approved})" class="px-2 py-1 rounded text-white font-bold ${doc.approved ? 'bg-amber-500' : 'bg-green-600'}">
-                            ${doc.approved ? 'تجميد' : 'تفعيل'}
-                        </button>
-                        <button onclick="deleteDoctor('${doc.id}')" class="bg-red-600 text-white px-2 py-1 rounded font-bold">حذف</button>
-                    </td>
-                `;
-                tableBody.appendChild(tr);
-            });
-        }
-
-        async function toggleDoctorApproval(docId, status) {
-            await db.ref(`doctors/${docId}/approved`).set(status);
-        }
-
-        async function deleteDoctor(docId) {
-            if(confirm('هل أنت متأكد من حذف هذا الحساب نهائياً من منصة طبيب شلف؟')) {
-                await db.ref(`doctors/${docId}`).remove();
-                await db.ref(`appointments/${docId}`).remove();
-            }
-        }
-    </script>
-</body>
-</html>
+                    <h4 class="font-bold text-teal-900 text-sm">تعديل رقم الحساب البريدي (CCP/BaridiMob)</h4>
+ 
