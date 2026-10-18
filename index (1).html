@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة طبيب شلف - Tabib Chlef</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- html2canvas for Image Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
+        body { font-family: 'Cairo', sans-serif; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-teal-700 text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('home')">
+                <i class="fa-solid fa-user-doctor text-3xl text-amber-300"></i>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide">طبيب شلف</h1>
+                    <p class="text-xs text-teal-200">المنصة الأولى لحجز المواعيد الطبية في شلف</p>
+                </div>
+            </div>
+            <nav class="flex gap-2">
+                <button onclick="switchTab('home')" class="px-3 py-1.5 rounded-lg bg-teal-800 hover:bg-teal-600 text-sm font-semibold transition"><i class="fa-solid fa-calendar-check ml-1"></i> حجز موعد</button>
+                <button onclick="switchTab('doctor-auth')" class="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-sm font-semibold transition"><i class="fa-solid fa-stethoscope ml-1"></i> حساب الأطباء والعيادات</button>
+                <button onclick="openAdminModal()" class="px-2 py-1.5 rounded-lg text-teal-300 hover:text-white transition" title="دخول الإدارة"><i class="fa-solid fa-user-shield"></i></button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6 flex-grow">
+
+        <!-- PUBLIC BOOKING TAB -->
+        <section id="tab-home" class="tab-content active space-y-6">
+            <div class="bg-gradient-to-r from-teal-600 to-teal-800 text-white p-6 rounded-2xl shadow-md text-center">
+                <h2 class="text-2xl font-bold mb-2">احجز موعدك الطبي بسهولة وبدون تسجيل</h2>
+                <p class="text-teal-100 text-sm">اختر الطبيب أو العيادة، أدخل بياناتك واحصل على رقم دورك ووصل الحجز فوراً!</p>
+            </div>
+
+            <!-- Filters -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-wrap gap-4 items-center justify-between">
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-xs font-bold text-gray-500 mb-1">التخصص الطبي / المنشأة</label>
+                    <select id="filter-specialty" onchange="renderDoctorsPublic()" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-teal-500">
+                        <option value="ALL">جميع التخصصات والعيادات</option>
+                        <option value="طب عام">طب عام</option>
+                        <option value="طب الأطفال">طب الأطفال</option>
+                        <option value="أمراض النساء والتوليد">أمراض النساء والتوليد</option>
+                        <option value="جراحة العظام">جراحة العظام</option>
+                        <option value="أمراض القلب">أمراض القلب</option>
+                        <option value="طب وجراحة العيون">طب وجراحة العيون</option>
+                        <option value="طب الأسنان">طب الأسنان</option>
+                        <option value="أمراض الجلد والمقاعد">أمراض الجلد والمقاعد</option>
+                        <option value="أنف وأذن وحنجرة (ENT)">أنف وأذن وحنجرة (ENT)</option>
+                        <option value="أمراض الجهاز الهضمي">أمراض الجهاز الهضمي</option>
+                        <option value="جراحة مخ وأعصاب">جراحة مخ وأعصاب</option>
+                        <option value="الجراحة العامة">الجراحة العامة</option>
+                        <option value="الطب النفسي والأعصاب">الطب النفسي والأعصاب</option>
+                        <option value="أمراض المسالك البولية">أمراض المسالك البولية</option>
+                        <option value="أمراض الغدد الصماء والسكري">أمراض الغدد الصماء والسكري</option>
+                        <option value="أمراض الرئة والجهاز التنفسي">أمراض الرئة والجهاز التنفسي</option>
+                        <option value="أمراض الكلى">أمراض الكلى</option>
+                        <option value="التغذية والتخسيس">التغذية والتخسيس</option>
+                        <option value="العلاج الفيزيائي وإعادة التأهيل">العلاج الفيزيائي وإعادة التأهيل</option>
+                        <option value="أمراض الدم والأورام">أمراض الدم والأورام</option>
+                        <option value="عيادة متخصصة / مجمع طبي">عيادة متخصصة / مجمع طبي</option>
+                    </select>
+                </div>
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-xs font-bold text-gray-500 mb-1">البحث باسم الطبيب أو العيادة</label>
+                    <input type="text" id="search-name" oninput="renderDoctorsPublic()" placeholder="اكتب اسم الطبيب أو العيادة..." class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+            </div>
+
+            <div id="public-doctors-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+
+        <!-- DOCTOR / CLINIC AUTH & DASHBOARD -->
+        <section id="tab-doctor-auth" class="tab-content space-y-6">
+            <div id="doctor-logged-out" class="max-w-xl mx-auto bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+                <div class="flex border-b mb-6">
+                    <button id="btn-show-login" onclick="toggleAuthForm('login')" class="w-1/2 py-3 font-bold text-teal-700 border-b-2 border-teal-700">تسجيل الدخول</button>
+                    <button id="btn-show-register" onclick="toggleAuthForm('register')" class="w-1/2 py-3 font-bold text-gray-500">إنشاء حساب جديد</button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="form-doctor-login" onsubmit="handleDoctorLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">رقم الهاتف (الأساسي) أو البريد الإلكتروني</label>
+                        <input type="text" id="login-identifier" required placeholder="06XXXXXXXX" class="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-teal-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">كلمة السر</label>
+                        <input type="password" id="login-password" required class="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-teal-500 outline-none">
+                    </div>
+                    <button type="submit" class="w-full bg-teal-600 text-white font-bold py-3 rounded-lg hover:bg-teal-700 transition">دخول لوحة التحكم</button>
+                </form>
+
+                <!-- Registration Form -->
+                <form id="form-doctor-register" onsubmit="handleDoctorRegister(event)" class="space-y-4 hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">نوع الحساب</label>
+                            <select id="reg-type" onchange="toggleClinicFields()" class="w-full border rounded-lg p-2.5 text-sm outline-none">
+                                <option value="doctor">طبيب مستقل</option>
+                                <option value="clinic">عيادة / مجمع طبي</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">اسم الطبيب أو العيادة</label>
+                            <input type="text" id="reg-name" placeholder="مثال: عيادة القرنية لطب وجراحة العيون" required class="w-full border rounded-lg p-2.5 text-sm outline-none">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">رقم الهاتف <span class="text-red-500">* (إجباري)</span></label>
+                            <input type="tel" id="reg-phone" placeholder="06XXXXXXXX" required class="w-full border rounded-lg p-2.5 text-sm outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">البريد الإلكتروني <span class="text-gray-400 text-xs">(اختياري)</span></label>
+                            <input type="email" id="reg-email" placeholder="example@domain.com" class="w-full border rounded-lg p-2.5 text-sm outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">التخصص الطبى</label>
+                        <select id="reg-specialty" class="w-full border rounded-lg p-2.5 text-sm outline-none">
+                            <option value="طب عام">طب عام</option>
+                            <option value="طب الأطفال">طب الأطفال</option>
+                            <option value="أمراض النساء والتوليد">أمراض النساء والتوليد</option>
+                            <option value="جراحة العظام">جراحة العظام</option>
+                            <option value="أمراض القلب">أمراض القلب</option>
+                            <option value="طب وجراحة العيون">طب وجراحة العيون</option>
+                            <option value="طب الأسنان">طب الأسنان</option>
+                            <option value="أمراض الجلد والمقاعد">أمراض الجلد والمقاعد</option>
+                            <option value="أنف وأذن وحنجرة (ENT)">أنف وأذن وحنجرة (ENT)</option>
+                            <option value="أمراض الجهاز الهضمي">أمراض الجهاز الهضمي</option>
+                            <option value="جراحة مخ وأعصاب">جراحة مخ وأعصاب</option>
+                            <option value="الجراحة العامة">الجراحة العامة</option>
+                            <option value="الطب النفسي والأعصاب">الطب النفسي والأعصاب</option>
+                            <option value="أمراض المسالك البولية">أمراض المسالك البولية</option>
+                            <option value="أمراض الغدد الصماء والسكري">أمراض الغدد الصماء والسكري</option>
+                            <option value="أمراض الرئة والجهاز التنفسي">أمراض الرئة والجهاز التنفسي</option>
+                            <option value="أمراض الكلى">أمراض الكلى</option>
+                            <option value="التغذية والتخسيس">التغذية والتخسيس</option>
+                            <option value="العلاج الفيزيائي وإعادة التأهيل">العلاج الفيزيائي وإعادة التأهيل</option>
+                            <option value="أمراض الدم والأورام">أمراض الدم والأورام</option>
+                            <option value="عيادة متخصصة / مجمع طبي">عيادة متخصصة / مجمع طبي</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">صورة الطبيب / العيادة (من الهاتف)</label>
+                        <input type="file" id="reg-image" accept="image/*" class="w-full border rounded-lg p-2 text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">رابط خرائط جوجل (Google Maps)</label>
+                        <input type="url" id="reg-map" placeholder="https://maps.google.com/..." class="w-full border rounded-lg p-2.5 text-sm outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">مواعيد العمل (الأيام والأوقات)</label>
+                        <textarea id="reg-schedule" placeholder="مثال: من السبت إلى الأربعاء (08:00 - 16:00)" class="w-full border rounded-lg p-2.5 text-sm outline-none h-16"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">أيام الجراحة</label>
+                            <input type="text" id="reg-surgery" placeholder="مثال: الإثنين صباحاً" class="w-full border rounded-lg p-2.5 text-sm outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">الطبيب البديل (Remplaçant)</label>
+                            <input type="text" id="reg-replacement" placeholder="اسم الطبيب البديل إن وجد" class="w-full border rounded-lg p-2.5 text-sm outline-none">
+                        </div>
+                    </div>
+
+                    <div id="clinic-doctors-container" class="hidden border-t pt-4 space-y-3">
+                        <label class="block text-sm font-bold text-teal-800">أطباء العيادة واختصاصاتهم</label>
+                        <div id="sub-doctors-list" class="space-y-2"></div>
+                        <button type="button" onclick="addSubDoctorInput()" class="text-xs bg-gray-200 hover:bg-gray-300 font-bold px-3 py-1.5 rounded-lg"><i class="fa-solid fa-plus ml-1"></i> إضافة طبيب آخر للعيادة</button>
+                    </div>
+
+                    <div class="bg-amber-50 p-4 rounded-xl border border-amber-200 space-y-2">
+                        <h4 class="font-bold text-amber-800 text-sm"><i class="fa-solid fa-receipt ml-1"></i> دفع الاشتراك البريدي (اختياري)</h4>
+                        <p class="text-xs text-amber-900">يمكنك دفع الاشتراك عبر البريد وإرفاق الوصل الآن أو لاحقاً:</p>
+                        <div class="bg-white p-2.5 rounded border text-center font-mono font-bold text-teal-800 text-sm select-all">
+                            CCP / RIP: <span id="display-admin-ccp">جاري التحميل...</span>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold mb-1 text-gray-700">تحميل وصل الاشتراك (اختياري)</label>
+                            <input type="file" id="reg-receipt" accept="image/*" class="w-full border bg-white rounded-lg p-1.5 text-xs">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">كلمة السر للحساب</label>
+                        <input type="password" id="reg-password" required class="w-full border rounded-lg p-2.5 text-sm outline-none">
+                    </div>
+
+                    <button type="submit" class="w-full bg-teal-600 text-white font-bold py-3 rounded-lg hover:bg-teal-700 transition">إرسال طلب التسجيل</button>
+                </form>
+            </div>
+
+            <!-- Doctor Logged In Panel -->
+            <div id="doctor-logged-in" class="hidden space-y-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border flex flex-wrap justify-between items-center gap-4">
+                    <div class="flex items-center gap-4">
+                        <img id="doc-profile-img" src="" class="w-16 h-16 rounded-full object-cover border-2 border-teal-600">
+                        <div>
+                            <h2 id="doc-profile-name" class="text-xl font-bold text-gray-800"></h2>
+                            <p id="doc-profile-status" class="text-xs font-semibold mt-1"></p>
+                        </div>
+                    </div>
+                    <button onclick="handleDoctorLogout()" class="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-red-100 transition"><i class="fa-solid fa-right-from-bracket ml-1"></i> تسجيل الخروج</button>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border space-y-4">
+                    <div class="flex flex-wrap justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold text-teal-800"><i class="fa-solid fa-users ml-2"></i> قائمة المرضى الحاجزين (تحديث لحظي)</h3>
+                        <button onclick="downloadPatientsImagePDF()" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2">
+                            <i class="fa-solid fa-file-pdf"></i> تحميل القائمة PDF (واضحة وبدون تشفير)
+                        </button>
+                    </div>
+
+                    <div id="pdf-printable-area" class="overflow-x-auto bg-white p-2">
+                        <table class="w-full text-right border-collapse min-w-[600px]">
+                            <thead>
+                                <tr class="bg-teal-700 text-white text-sm">
+                                    <th class="p-3 border"># رقم التسجيل</th>
+                                    <th class="p-3 border">اسم المريض ولقبه</th>
+                                    <th class="p-3 border">رقم الهاتف</th>
+                                    <th class="p-3 border">الطبيب المستهدف</th>
+                                    <th class="p-3 border">تاريخ ووقت الحجز</th>
+                                    <th class="p-3 border">الحالة</th>
+                                    <th class="p-3 border text-center no-print">إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="doctor-patients-table" class="text-sm divide-y"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ADMIN MODAL -->
+    <div id="admin-modal" class="fixed inset-0 bg-black/60 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-6 shadow-2xl">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-user-shield text-teal-600 ml-2"></i> لوحة أدمن منصة طبيب شلف</h3>
+                <button onclick="closeAdminModal()" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+            </div>
+
+            <div id="admin-login-form" class="space-y-4 max-w-sm mx-auto py-6">
+                <div>
+                    <label class="block text-sm font-semibold mb-1">رقم هاتف الأدمن</label>
+                    <input type="text" id="admin-phone-input" placeholder="0670800009" class="w-full border rounded-lg p-2.5 text-sm outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">الرقم السري</label>
+                    <input type="password" id="admin-pass-input" placeholder="27" class="w-full border rounded-lg p-2.5 text-sm outline-none">
+                </div>
+                <button onclick="handleAdminLogin()" class="w-full bg-teal-700 text-white font-bold py-2.5 rounded-lg hover:bg-teal-800 transition">دخول لوحة التحكم</button>
+            </div>
+
+            <div id="admin-dashboard-content" class="hidden space-y-6">
+                <div class="bg-teal-50 p-4 rounded-xl border border-teal-200 space-y-3">
+                    <h4 class="font-bold text-teal-900 text-sm">تعديل رقم الحساب البريدي (CCP/BaridiMob)</h4>
+ 
